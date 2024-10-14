@@ -5,7 +5,7 @@ import db from '../models';  // Asegúrate de importar tus modelos
 interface SpaceMission {
   Rocket: string;
   Mission: string;
-  Company: string; // Añadido para incluir la empresa
+  Company: string; // Campo de empresa
   // Otros campos...
 }
 
@@ -19,7 +19,7 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
       for (const missionData of results) {
         // Busca o crea la empresa relacionada
         const [company] = await db.Company.findOrCreate({
-          where: { name: missionData.Company }, // Asegúrate de que 'Company' sea el nombre correcto del campo en el CSV
+          where: { name: missionData.Company }, // Asegúrate de que 'Company' es el campo correcto en el CSV
         });
 
         // Busca o crea la misión relacionada
@@ -28,21 +28,18 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
           defaults: { companyId: company.id } // Vincula la misión con la empresa creada
         });
 
-        // Solo inserta el cohete si la misión se creó correctamente
-        if (mission) {
-          await db.Rocket.create({
-            name: missionData.Rocket,
-            missionId: mission.id  // Usa el ID de la misión encontrada/creada
-          });
-        }
+        // Inserta el cohete y vincúlalo con la empresa y misión correspondientes
+        await db.Rocket.create({
+          name: missionData.Rocket,
+          missionId: mission.id,  // Vincula el cohete con la misión
+          companyId: company.id   // Vincula el cohete con la empresa
+        });
       }
       console.log('Datos insertados correctamente');
     } catch (error) {
       console.error('Error al insertar datos: ', error);
     }
   });
-
-
 
 // INSERTA ROCKET Y MISSION CORRECTAMENTE
 // import fs from 'fs';
