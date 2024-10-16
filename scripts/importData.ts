@@ -5,7 +5,8 @@ import db from '../models';  // Asegúrate de importar tus modelos
 interface SpaceMission {
   Rocket: string;
   Mission: string;
-  Company: string; // Campo de empresa
+  Company: string; 
+  DateTime: string; // Asegúrate de que DateTime es el campo correcto en el CSV
   // Otros campos...
 }
 
@@ -29,10 +30,16 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
         });
 
         // Inserta el cohete y vincúlalo con la empresa y misión correspondientes
-        await db.Rocket.create({
+        const rocket = await db.Rocket.create({
           name: missionData.Rocket,
           missionId: mission.id,  // Vincula el cohete con la misión
           companyId: company.id   // Vincula el cohete con la empresa
+        });
+
+        // **Nuevo**: Inserta el DateTime en la tabla 'DateTimes'
+        await db.DateTime.create({
+          dateandtime: missionData.DateTime,  // Inserta el valor de la columna 'DateTime'
+          missionId: mission.id  // Vincula la fecha/hora con la misión correspondiente
         });
       }
       console.log('Datos insertados correctamente');
@@ -40,6 +47,50 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
       console.error('Error al insertar datos: ', error);
     }
   });
+
+
+// import fs from 'fs';
+// import csv from 'csv-parser';
+// import db from '../models';  // Asegúrate de importar tus modelos
+
+// interface SpaceMission {
+//   Rocket: string;
+//   Mission: string;
+//   Company: string; // Campo de empresa
+//   // Otros campos...
+// }
+
+// const results: SpaceMission[] = [];
+
+// fs.createReadStream('data/space_missions_2 Fer.csv')
+//   .pipe(csv())
+//   .on('data', (data: SpaceMission) => results.push(data))
+//   .on('end', async () => {
+//     try {
+//       for (const missionData of results) {
+//         // Busca o crea la empresa relacionada
+//         const [company] = await db.Company.findOrCreate({
+//           where: { name: missionData.Company }, // Asegúrate de que 'Company' es el campo correcto en el CSV
+//         });
+
+//         // Busca o crea la misión relacionada
+//         const [mission] = await db.Mission.findOrCreate({
+//           where: { name: missionData.Mission },
+//           defaults: { companyId: company.id } // Vincula la misión con la empresa creada
+//         });
+
+//         // Inserta el cohete y vincúlalo con la empresa y misión correspondientes
+//         await db.Rocket.create({
+//           name: missionData.Rocket,
+//           missionId: mission.id,  // Vincula el cohete con la misión
+//           companyId: company.id   // Vincula el cohete con la empresa
+//         });
+//       }
+//       console.log('Datos insertados correctamente');
+//     } catch (error) {
+//       console.error('Error al insertar datos: ', error);
+//     }
+//   });
 
 // INSERTA ROCKET Y MISSION CORRECTAMENTE
 // import fs from 'fs';
