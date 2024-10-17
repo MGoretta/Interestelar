@@ -1,12 +1,16 @@
 import fs from 'fs';
 import csv from 'csv-parser';
-import db from '../models';  // Asegúrate de importar tus modelos
+import db from '../models'; 
 
 interface SpaceMission {
   Rocket: string;
   Mission: string;
   Company: string; 
-  DateTime: string; // Asegúrate de que DateTime es el campo correcto en el CSV
+  DateTime: string; 
+  ComplexLaunch: string; // Agrega esta propiedad
+  LaunchCenter: string;  // Agrega esta propiedad
+  State: string;        // Agrega esta propiedad
+  Country: string;      // Agrega esta propiedad
   // Otros campos...
 }
 
@@ -20,26 +24,35 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
       for (const missionData of results) {
         // Busca o crea la empresa relacionada
         const [company] = await db.Company.findOrCreate({
-          where: { name: missionData.Company }, // Asegúrate de que 'Company' es el campo correcto en el CSV
+          where: { name: missionData.Company },
+        });
+
+        // Crea la dirección concatenada
+        const fullAddress = `${missionData.ComplexLaunch}, ${missionData.LaunchCenter}, ${missionData.State}, ${missionData.Country}`;
+
+        // Inserta el nuevo Location
+        const location = await db.Location.create({
+          address: fullAddress,
+          companyId: company.id // Vincula la locación con la empresa
         });
 
         // Busca o crea la misión relacionada
         const [mission] = await db.Mission.findOrCreate({
           where: { name: missionData.Mission },
-          defaults: { companyId: company.id } // Vincula la misión con la empresa creada
+          defaults: { companyId: company.id } 
         });
 
         // Inserta el cohete y vincúlalo con la empresa y misión correspondientes
         const rocket = await db.Rocket.create({
           name: missionData.Rocket,
-          missionId: mission.id,  // Vincula el cohete con la misión
-          companyId: company.id   // Vincula el cohete con la empresa
+          missionId: mission.id,
+          companyId: company.id 
         });
 
-        // **Nuevo**: Inserta el DateTime en la tabla 'DateTimes'
+        // Inserta el DateTime en la tabla 'DateTimes'
         await db.DateTime.create({
-          dateandtime: missionData.DateTime,  // Inserta el valor de la columna 'DateTime'
-          missionId: mission.id  // Vincula la fecha/hora con la misión correspondiente
+          dateandtime: missionData.DateTime,
+          missionId: mission.id 
         });
       }
       console.log('Datos insertados correctamente');
@@ -47,6 +60,7 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
       console.error('Error al insertar datos: ', error);
     }
   });
+
 
 
 // import fs from 'fs';
