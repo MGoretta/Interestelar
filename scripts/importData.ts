@@ -7,10 +7,12 @@ interface SpaceMission {
   Mission: string;
   Company: string; 
   DateTime: string; 
-  ComplexLaunch: string; // Agrega esta propiedad
-  LaunchCenter: string;  // Agrega esta propiedad
-  State: string;        // Agrega esta propiedad
-  Country: string;      // Agrega esta propiedad
+  ComplexLaunch: string; 
+  LaunchCenter: string;  
+  State: string;        
+  Country: string;      
+  MissionStatus: string; 
+  RocketStatus: string;// Si también necesitas esto
   // Otros campos...
 }
 
@@ -21,8 +23,16 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
   .on('data', (data: SpaceMission) => results.push(data))
   .on('end', async () => {
     try {
+      console.log(`Total de misiones a procesar: ${results.length}`);
       for (const missionData of results) {
         // Busca o crea la empresa relacionada
+
+        // Validación para asegurarse de que el nombre de la misión esté definido
+        if (!missionData.Mission) { // Cambia 'Mission' por el nombre correcto de la propiedad si es diferente
+          console.error('El nombre de la misión no está definido:', missionData);
+          continue; // Omite esta iteración si no hay nombre
+        }
+
         const [company] = await db.Company.findOrCreate({
           where: { name: missionData.Company },
         });
@@ -49,10 +59,22 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
           companyId: company.id 
         });
 
+        // Inserta el estado de la misión en 'MissionStatus'
+        await db.MissionStatus.create({
+          status: missionData.MissionStatus, // Si también necesitas esto
+          missionId: mission.id // Vincula el estado con la misión correspondiente
+        });
+
         // Inserta el DateTime en la tabla 'DateTimes'
         await db.DateTime.create({
           dateandtime: missionData.DateTime,
           missionId: mission.id 
+        });
+
+        // Inserta el estado del cohete en 'RocketStatus'
+        await db.RocketStatus.create({
+          status: missionData.RocketStatus, // Inserta el estado del cohete desde el CSV
+          rocketId: rocket.id // Vincula el estado con el cohete correspondiente
         });
       }
       console.log('Datos insertados correctamente');
@@ -60,6 +82,8 @@ fs.createReadStream('data/space_missions_2 Fer.csv')
       console.error('Error al insertar datos: ', error);
     }
   });
+
+
 
 
 
