@@ -33,11 +33,15 @@ fs
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
+    console.log(`Associating model: ${modelName}`);
     db[modelName].associate(db);
   }
 });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
+console.log('Modelos cargados en db:', Object.keys(db));
+
 
 export default db;
