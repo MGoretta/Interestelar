@@ -20,7 +20,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
       // Definir la relación con Mission
       DateTime.belongsTo(models.Mission, {
         foreignKey: 'missionId',
-        as: 'datetimeMission'
+        as: 'missionDateTime'
       });
     }
   }

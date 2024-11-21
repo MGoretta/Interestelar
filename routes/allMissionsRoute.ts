@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import db from '../models';
 
-const { Mission, Company, Location, Rocket, RocketStatus, Price, MissionStatus, Datetime } = db;
+const { Mission, Company, Location, Rocket, RocketStatus, Price, MissionStatus, DateTime } = db;
 
 const router = Router();
 
@@ -31,10 +31,10 @@ router.get('/missions', async (req: Request, res: Response) => {
           model: MissionStatus,
           as: 'missionStatus', // Verifica que coincida con el alias en `associate`
         },
-        // {
-        //   model: Datetime,
-        //   as: 'missionDateTime', // Verifica que coincida con el alias en `associate`
-        // },
+        {
+          model: DateTime,
+          as: 'missionDateTime', // Asegúrate de que este alias coincida
+        }
       ],
     });
 
